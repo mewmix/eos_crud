@@ -10,17 +10,17 @@ class [[eosio::contract("addressbook")]] addressbook : public eosio::contract
         addressbook(name receiver, name code, datastream<const char*> ds):contract(receiver, code, ds) {}
 
         [[eosio::action]]
-        void upsert (name user, std::string first_name, string c_city){
+        void upsert (name user, std::string time, string temp){
             address_index addresses(get_self(), get_first_receiver().value);
 
             addresses.emplace(user, [&]( auto& row ) {
       row.key = user;
-      row.fname = first_name;
-      row.city = c_city;
+      row.time = time;
+      row.temp = temp;
 
       print("row.key", row.key);
-      print("row.fname",row.fname);
-      print("row.city",row.city);
+      print("row.time",row.time);
+      print("row.temp",row.temp);
 
         });
 
@@ -42,19 +42,19 @@ class [[eosio::contract("addressbook")]] addressbook : public eosio::contract
             address_index addresses(get_self(), get_first_receiver().value);
             auto iterator = addresses.find(user.value);
             check(iterator != addresses.end(), "Record does not exist");
-            print("Post_user: ", iterator->key, "  Post_fname: ", iterator->fname.c_str(), " Content: ", iterator->city.c_str());
+            print("Post_user: ", iterator->key, "  Post_time: ", iterator->time.c_str(), " Content: ", iterator->temp.c_str());
         }
     private:
-        struct [[eosio::table]] person {
+        struct [[eosio::table]] data {
             name key;
-            string fname;
-            string city;
+            string time;
+            string temp;
 
             uint64_t primary_key() const {return key.value ;}
-            EOSLIB_SERIALIZE(person, (key)(fname)(city))
+            EOSLIB_SERIALIZE(data, (key)(time)(temp))
         };
 
-        typedef eosio::multi_index<"people"_n, person> address_index;
+        typedef eosio::multi_index<"aggregate"_n, data> address_index;
 
 
 
